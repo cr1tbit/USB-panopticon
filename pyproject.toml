@@ -1,0 +1,19 @@
+[project]
+name = "usb-panopticon"
+version = "0.1.0"
+license = "MIT"
+description = "Bench USB watcher: MCU serial/MSC ports, re-enumeration loops and USB errors on the DMS/niri bar"
+requires-python = ">=3.12"
+dependencies = [
+    "pyudev>=0.24",
+]
+
+[project.scripts]
+usb-panopticon = "usb_panopticon.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

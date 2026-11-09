@@ -1,0 +1,6 @@
+# Let the plugdev group disable/enable hub ports (usb-panopticon "cycle port"): makes every
+# /sys/.../<hub-interface>/<port>/disable group-writable. Port devices raise no uevents of their own,
+# so this hooks the hub interface (ports exist once the hub driver is bound).
+#   sudo install -m644 udev/71-usb-panopticon.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=usb --action=change
+ACTION!="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", DRIVER=="hub", RUN+="/bin/sh -c 'chgrp plugdev /sys%p/*-port*/disable; chmod g+w /sys%p/*-port*/disable'"

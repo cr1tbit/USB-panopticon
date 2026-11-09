@@ -1,0 +1,12 @@
+[Unit]
+Description=usb-panopticon: bench USB watcher for the DMS bar
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/Projects/clanking/usb-panopticon/.venv/bin/usb-panopticon daemon
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

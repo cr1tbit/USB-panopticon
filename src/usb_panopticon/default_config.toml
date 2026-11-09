@@ -1,0 +1,164 @@
+# usb-panopticon config. The daemon re-reads this file when it changes.
+# Location: ~/.config/usb-panopticon/config.toml (written from the packaged default on first run).
+
+[settings]
+gone_keep_s = 60          # keep a disconnected device greyed out this long
+error_keep_s = 120        # a port with USB errors stays listed this long after the last error
+loop_window_s = 30        # "looping" = at least loop_count connects within loop_window_s
+loop_count = 3
+alert_s = 5               # how long a new USB error is flashed on the bar
+bar_max_chips = 4         # devices shown on the bar pill; the rest are in the popout
+ignore_ports = []         # e.g. ["3-1.4.1"]: never show these ports (errors included)
+cycle_off_s = 1.0         # port cycle: how long the port stays disabled
+
+# Rules: first match wins. A USB device that matches no rule is hidden (its USB errors are still shown).
+#   match   glob on "vid:pid" (lowercase hex), e.g. "303a:1001", "2e8a:*", "1a86:55d?"
+#   product optional regex (case-insensitive), searched in the USB product string
+#   has     optional "tty" or "msc": the device must currently expose a serial port / block device
+#   kind    mcu | bridge | probe | serial | ignore     (probe = separate group, ignore = hide)
+#   mode    optional: app | boot
+#   label   short name for the bar (empty = USB product string)
+
+# ---------------------------------------------------------------- debug probes
+[[rule]]
+match = "2e8a:000c"
+label = "Debugprobe"
+kind = "probe"
+
+[[rule]]
+match = "1a86:801?"
+label = "WCH-Link"
+kind = "probe"
+
+[[rule]]
+match = "0483:37??"
+label = "ST-Link"
+kind = "probe"
+
+[[rule]]
+match = "0483:375?"
+label = "ST-Link"
+kind = "probe"
+
+[[rule]]
+match = "1366:*"
+label = "J-Link"
+kind = "probe"
+
+[[rule]]
+match = "1d50:6018"
+label = "BMP"
+kind = "probe"
+
+[[rule]]
+match = "0403:6010"
+label = "FT2232/ESP-Prog"
+kind = "probe"
+
+[[rule]]
+match = "*"
+product = "CMSIS-DAP"
+label = "CMSIS-DAP"
+kind = "probe"
+
+# ---------------------------------------------------------------- MCUs with native USB
+[[rule]]
+match = "303a:1001"
+label = "ESP"            # USB-Serial-JTAG (C3/C6/H2/S3): same id in ROM download mode and in the app
+kind = "mcu"
+
+[[rule]]
+match = "303a:0002"
+label = "ESP"            # S2/S3 ROM download mode over USB-OTG
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "303a:*"
+label = "ESP"            # TinyUSB / Arduino app
+kind = "mcu"
+mode = "app"
+
+[[rule]]
+match = "2e8a:000f"
+label = "RP2350"
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "2e8a:0003"
+label = "RP2040"
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "2e8a:*"
+label = "RP2"
+kind = "mcu"
+mode = "app"
+
+[[rule]]
+match = "0483:df11"
+label = "STM32"
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "4348:55e0"
+label = "WCH"
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "1a86:55e0"
+label = "WCH"
+kind = "mcu"
+mode = "boot"
+
+[[rule]]
+match = "1915:*"
+label = "nRF"
+kind = "mcu"
+
+[[rule]]
+match = "239a:*"
+label = "UF2"            # Adafruit VID: TinyUF2 / CircuitPython boards
+kind = "mcu"
+
+# ---------------------------------------------------------------- USB-UART bridges
+[[rule]]
+match = "10c4:ea6?"
+label = "CP210x"
+kind = "bridge"
+
+[[rule]]
+match = "10c4:ea7?"
+label = "CP210x"
+kind = "bridge"
+
+[[rule]]
+match = "1a86:752?"
+label = "CH340"
+kind = "bridge"
+
+[[rule]]
+match = "1a86:55d?"
+label = "CH34x"
+kind = "bridge"
+
+[[rule]]
+match = "0403:60??"
+label = "FTDI"
+kind = "bridge"
+
+[[rule]]
+match = "067b:2303"
+label = "PL2303"
+kind = "bridge"
+
+# ---------------------------------------------------------------- anything else with a serial port
+[[rule]]
+match = "*"
+has = "tty"
+label = ""
+kind = "serial"

@@ -1,0 +1,12 @@
+{
+    "id": "usbPanopticon",
+    "name": "USB Panopticon",
+    "description": "Bench USB watcher: MCU serial/MSC ports with uptime and reconnect loops, debug probes, USB enumeration errors",
+    "version": "0.1.0",
+    "author": "CritBit",
+    "type": "widget",
+    "capabilities": ["dankbar-widget"],
+    "component": "./UsbPanopticon.qml",
+    "icon": "usb",
+    "permissions": ["settings_read"]
+}
