@@ -33,6 +33,13 @@ run and reloaded on change. First-match rules on `vid:pid` glob (+ optional prod
 (`app`/`boot`). Unmatched devices are hidden; USB errors are shown for any port (`ignore_ports` to
 silence one). A broken config falls back to the default and the error shows in the popout.
 
+## Bar entry mouse actions
+
+- left click: popout (opens after the double-click interval)
+- double left click: run `terminal_cmd` from the config, `{port}` = the device's first tty (shell-quoted),
+  default `alacritty -e picocom {port} --baud 115200`
+- hold right button 1 s: port cycle (below)
+
 ## Port cycle
 
 Expand a card in the popout → "cycle port", or hold the right mouse button on a bar entry for 1 s.

@@ -162,7 +162,7 @@ class Daemon:
         bus = sorted([e["t"], "e"] for p in self.ports.values() if p.name not in ignored
                      for e in p.errors if now - e["t"] < TIMELINE_S)
         return {"type": "state", "now": now, "rows": self.rows(now), "alert": self.alert, "bus_timeline": bus,
-                "alert_s": self.cfg.settings["alert_s"], "bar_max_chips": self.cfg.settings["bar_max_chips"],
+                "alert_s": self.cfg.settings["alert_s"], "terminal_cmd": self.cfg.settings["terminal_cmd"], "bar_max_chips": self.cfg.settings["bar_max_chips"],
                 "config_error": self.cfg_error, "config_path": str(config.PATH)}
 
     def changed(self):

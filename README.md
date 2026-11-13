@@ -15,6 +15,7 @@ Features:
 * additional relevant info on left-click
 * "port cycle" (or power cycle on compatible USB hubs) usb port by press-and-hold right mouse button on port name for 1 second
 * config device rules by TOML config
+* double left click on a bar entry opens a terminal on its tty (`terminal_cmd` in the config, default `alacritty -e picocom {port} --baud 115200`)
 * CLI available: `usb-panopticon ls | watch | wait esp --new | cycle PORT`.
 
 Install, rules and internals: [docs/details.md](docs/details.md).

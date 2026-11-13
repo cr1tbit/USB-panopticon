@@ -10,6 +10,8 @@ alert_s = 5               # how long a new USB error is flashed on the bar
 bar_max_chips = 4         # devices shown on the bar pill; the rest are in the popout
 ignore_ports = []         # e.g. ["3-1.4.1"]: never show these ports (errors included)
 cycle_off_s = 1.0         # port cycle: how long the port stays disabled
+# double left click on a bar entry runs this (sh -c); {port} = the device's tty, shell-quoted
+terminal_cmd = "alacritty -e picocom {port} --baud 115200"
 
 # Rules: first match wins. A USB device that matches no rule is hidden (its USB errors are still shown).
 #   match   glob on "vid:pid" (lowercase hex), e.g. "303a:1001", "2e8a:*", "1a86:55d?"

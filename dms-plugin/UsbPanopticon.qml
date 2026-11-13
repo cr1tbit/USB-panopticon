@@ -35,6 +35,18 @@ PluginComponent {
         return m;
     }
 
+    // double click on a bar entry: run terminal_cmd from the config with {port} = first tty
+    function openTerminal(r) {
+        const tty = r && r.present && r.ttys.length ? r.ttys[0].dev : "";
+        if (!tty) {
+            ToastService.showWarning("No serial port", (r ? r.label + " on " + r.port : "device") + " has no tty right now");
+            return;
+        }
+        const cmd = (st.terminal_cmd || "").split("{port}").join("'" + tty.replace(/'/g, "'\\''") + "'");
+        if (cmd)
+            Quickshell.execDetached(["sh", "-c", cmd]);
+    }
+
     function cycle(port) {
         sock.send({ "op": "cycle", "port": port });
     }
@@ -125,13 +137,14 @@ PluginComponent {
     function segments(r, windowS) {
         const n = now, from = n - windowS;
         const ud = (r.timeline || []).filter(e => e[1] === "u" || e[1] === "d");
-        // state at the left edge: the event carried from before the window, else the opposite of the first one
-        let up = ud.length ? (ud[0][0] < from ? ud[0][1] === "u" : ud[0][1] === "d") : r.present;
-        let cur = up ? from : null;
+        // state at the left edge: the last event before the window, else the opposite of the first one
+        let cur = (ud.length ? ud[0][1] === "d" : r.present) ? from : null;
         const segs = [];
         for (const [t, e] of ud) {
-            if (t < from)
+            if (t < from) {
+                cur = e === "u" ? from : null;
                 continue;
+            }
             if (e === "u" && cur === null)
                 cur = t;
             else if (e === "d" && cur !== null) {
@@ -276,10 +289,26 @@ PluginComponent {
                         color: Theme.warning
                     }
 
+                    // left: click = popout (after the double-click interval), double click = terminal
+                    // right: hold 1 s = port cycle
                     MouseArea {
                         anchors.fill: parent
-                        acceptedButtons: Qt.RightButton
-                        onPressed: holdAnim.restart()
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        cursorShape: Qt.PointingHandCursor
+                        onPressed: m => {
+                            if (m.button === Qt.RightButton)
+                                holdAnim.restart();
+                        }
+                        onClicked: m => {
+                            if (m.button === Qt.LeftButton)
+                                clickTimer.restart();
+                        }
+                        onDoubleClicked: m => {
+                            if (m.button !== Qt.LeftButton)
+                                return;
+                            clickTimer.stop();
+                            root.openTerminal(entry.r);
+                        }
                         onReleased: {
                             holdAnim.stop();
                             entry.hold = 0;
@@ -288,6 +317,12 @@ PluginComponent {
                             holdAnim.stop();
                             entry.hold = 0;
                         }
+                    }
+
+                    Timer {
+                        id: clickTimer
+                        interval: Qt.styleHints.mouseDoubleClickInterval
+                        onTriggered: root.triggerPopout()
                     }
 
                     NumberAnimation {
@@ -314,12 +349,29 @@ PluginComponent {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            DW.DIcon {
-                visible: root.probesUp > 0
-                name: "bug_report"
-                size: Theme.iconSize - 8
-                color: Theme.surfaceVariantText
-                anchors.verticalCenter: parent.verticalCenter
+            // debug probes: icon + strip each, no label
+            Repeater {
+                model: root.probeRows
+                delegate: Row {
+                    required property var modelData
+                    spacing: 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    DW.DIcon {
+                        name: "bug_report"
+                        size: Theme.iconSize - 8
+                        color: root.recentError(modelData) ? Theme.error : Theme.surfaceVariantText
+                        opacity: modelData.present ? 1 : 0.5
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Strip {
+                        pc: root
+                        r: modelData
+                        width: 30
+                        height: Theme.iconSize - 6
+                        windowS: 60
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
             }
 
             // bus errors (any port): always present, red icon right after an error, ticks on its strip
